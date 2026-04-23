@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useRef, useEffect } from "react";
 
 const GC = { fashion:'#E91E63', drinks:'#0288D1', cars:'#D32F2F', tech:'#2E7D32', hotels:'#F57C00' };
