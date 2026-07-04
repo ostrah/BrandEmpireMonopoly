@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>МОНОПОЛИЯ · Биржа 1929</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Oswald:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=9">
+<link rel="stylesheet" href="game.css?v=9">
+<style>
+  /* сброс размеров inline-SVG логотипов/гербов */
+  .logo svg, .bl svg, .cert .logo-lg svg, [data-crest] svg, .mini-logo svg{width:100%; height:100%; display:block;}
+</style>
+</head>
+<body>
+<div class="paper-fx"></div>
+
+<!-- бегущая биржевая строка -->
+<div class="ticker">
+  <div class="rail">
+    <span><span class="sym">NZMA</span> 350.0 <span class="up">▲ 2.1%</span></span>
+    <span><span class="sym">EPPL</span> 400.0 <span class="up">▲ 0.8%</span></span>
+    <span><span class="sym">SPTF</span> 300.0 <span class="dn">▼ 1.4%</span></span>
+    <span><span class="sym">NTFX</span> 240.0 <span class="up">▲ 3.2%</span></span>
+    <span><span class="sym">CSCL</span> 220.0 <span class="dn">▼ 0.6%</span></span>
+    <span><span class="sym">YOTN</span> 220.0 <span class="up">▲ 1.1%</span></span>
+    <span><span class="sym">REDT</span> 180.0 <span class="dn">▼ 2.3%</span></span>
+    <span><span class="sym">INGL</span> 140.0 <span class="up">▲ 4.0%</span></span>
+    <span><span class="sym">MCRN</span> 260.0 <span class="up">▲ 0.5%</span></span>
+    <span><span class="sym">TSLR</span> 150.0 <span class="dn">▼ 1.9%</span></span>
+    <span><span class="sym">UBAR</span> 200.0 <span class="up">▲ 2.7%</span></span>
+    <span><span class="sym">FODX</span> 200.0 <span class="dn">▼ 0.3%</span></span>
+  </div>
+</div>
+
+<!-- мастхед -->
+<header class="topbar">
+  <div class="brand">
+    <div class="crest" data-crest></div>
+    <div class="txt">
+      <span class="word" data-i18n="brand.word">МОНОПОЛИЯ</span>
+      <span class="sub" data-i18n="brand.sub">БИРЖА · 1929</span>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="home" data-i18n="nav.home">Главная</button>
+    <button class="tab-btn" data-tab="lobby" data-i18n="nav.lobby">Лобби</button>
+    <button class="tab-btn hidden" data-tab="game" id="tabGame" data-i18n="nav.game">Партия</button>
+    <button class="tab-btn" data-tab="card" data-i18n="nav.card">Сертификат</button>
+    <button class="tab-btn" data-tab="brands" data-i18n="nav.brands">Бренд-кит</button>
+    <button class="tab-btn" data-tab="ds" data-i18n="nav.style">Стиль</button>
+  </nav>
+  <div class="lang-switch">
+    <button data-lang="ru" class="on">РУ</button>
+    <button data-lang="en">EN</button>
+  </div>
+  <div class="auth-actions">
+    <button class="btn mail-btn hidden" id="mailBtn" type="button" data-i18n-title="mail.title" title="Почтовое отделение">📮<span class="mail-badge hidden" id="mailBadge"></span></button>
+    <span class="user-chip hidden" id="userChip">🎩 <b id="userName"></b></span>
+    <button class="btn hidden" id="logoutBtn" type="button" data-i18n="auth.logout">Выйти</button>
+    <button class="btn" id="navLogin" type="button" data-goto="login" data-i18n="auth.login">Войти</button>
+    <button class="btn btn-primary" id="navRegister" type="button" data-goto="register" data-i18n="auth.register">Регистрация</button>
+  </div>
+</header>
+
+<main>
+  <!-- ================= ГЛАВНАЯ ================= -->
+  <section class="tab-page active" id="page-home">
+    <div class="home">
+      <div class="gazette">
+        <div class="gz-masthead">
+          <div class="gz-topline">
+            <span data-i18n="home.issue">Выпуск №1929</span>
+            <span data-i18n="home.price">Цена — 1 акция</span>
+            <span data-i18n="home.day">Понедельник · утренний</span>
+          </div>
+          <div class="gz-title" data-i18n="home.title">Биржевой Вестник</div>
+          <div class="gz-sub" data-i18n="home.tagline">ежедневник спекулянта и настольного магната</div>
+        </div>
+
+        <div class="gz-hero">
+          <div class="gz-hero-main">
+            <div class="kicker" data-i18n="home.kicker">Сенсация сезона</div>
+            <h1 data-i18n="home.headline">«Монополия» выходит в онлайн</h1>
+            <p class="lede" data-i18n="home.lede">Собери портфель пародийных корпораций, дави конкурентов рентой и стань
+              единственным магнатом за столом. От 2 до 6 игроков, живые торги, аукционы и сделки — прямо в браузере.</p>
+            <div class="gz-cta">
+              <button class="btn btn-primary" data-goto="register" data-i18n="home.cta.register">Открыть счёт — бесплатно</button>
+              <button class="btn" data-goto="login" data-i18n="home.cta.login">Войти</button>
+              <button class="btn btn-gold" data-goto="lobby" data-i18n="home.cta.quick">Быстрая игра</button>
+            </div>
+            <div class="gz-stats">
+              <div><b>1 248</b><span data-i18n="home.stat.online">игроков в сети</span></div>
+              <div><b>342</b><span data-i18n="home.stat.games">партии идут</span></div>
+              <div><b>28</b><span data-i18n="home.stat.corps">корпораций</span></div>
+              <div><b>2–6</b><span data-i18n="home.stat.table">за столом</span></div>
+            </div>
+          </div>
+          <div class="gz-hero-side">
+            <div class="gz-crest" data-crest></div>
+            <div class="gz-quote"><span data-i18n="home.quote">«Покупай дёшево, сдавай в аренду дорого.»</span>
+              <small data-i18n="home.quote.src">— золотое правило доски</small></div>
+          </div>
+        </div>
+
+        <div class="gz-columns">
+          <div class="gz-col">
+            <h3 data-i18n="home.how.title">Как играть</h3>
+            <ol>
+              <li data-i18n="home.how.1">Бросай кубики и обходи доску по кругу.</li>
+              <li data-i18n="home.how.2">Скупай компании и собирай цветовые группы.</li>
+              <li data-i18n="home.how.3">Ставь отделения — рента растёт в разы.</li>
+              <li data-i18n="home.how.4">Разори всех соперников и останься один.</li>
+            </ol>
+          </div>
+          <div class="gz-col">
+            <h3 data-i18n="home.why.title">Чем хороша</h3>
+            <ul class="feat">
+              <li data-i18n="home.why.1">🎩 Пародийные бренды вместо скучных улиц</li>
+              <li data-i18n="home.why.2">⚖️ Аукционы и сделки в реальном времени</li>
+              <li data-i18n="home.why.3">🔒 «Под следствием» вместо тюрьмы</li>
+              <li data-i18n="home.why.4">📈 Рейтинг и таблица магнатов</li>
+              <li data-i18n="home.why.5">💬 Чат и голосования прямо в партии</li>
+            </ul>
+          </div>
+          <div class="gz-col gz-board-list">
+            <h3 data-i18n="home.quotes.title">Котировки дня</h3>
+            <div id="homeQuotes"></div>
+          </div>
+        </div>
+      </div>
+      <div class="gz-footer" data-i18n="home.footer">© 1929 Биржевой Вестник · дружеская пародия · играйте честно</div>
+    </div>
+  </section>
+
+  <!-- ================= ВХОД ================= -->
+  <section class="tab-page" id="page-login">
+    <div class="auth">
+      <div class="auth-card">
+        <div class="auth-crest" data-crest></div>
+        <div class="auth-title" data-i18n="login.title">Вход в контору</div>
+        <div class="auth-sub" data-i18n="login.sub">Рады видеть снова, магнат</div>
+        <form class="auth-form" data-auth="login" novalidate>
+          <div class="field">
+            <label data-i18n="field.email">Почта</label>
+            <input type="email" name="email" autocomplete="email" data-i18n-ph="ph.email" placeholder="broker@birzha.ru">
+            <div class="err" data-err="email"></div>
+          </div>
+          <div class="field">
+            <label data-i18n="field.password">Пароль</label>
+            <div class="pw">
+              <input type="password" name="password" autocomplete="current-password" data-i18n-ph="ph.password" placeholder="••••••••">
+              <button type="button" class="pw-toggle" data-i18n="pw.show">показать</button>
+            </div>
+            <div class="err" data-err="password"></div>
+          </div>
+          <div class="auth-row">
+            <label class="chk"><input type="checkbox" checked><span data-i18n="login.remember">Запомнить меня</span></label>
+            <a class="link" data-i18n="login.forgot">Забыли пароль?</a>
+          </div>
+          <button class="btn btn-primary" type="submit" style="width:100%" data-i18n="login.submit">Войти</button>
+        </form>
+        <div class="auth-or"><span data-i18n="auth.or">или</span></div>
+        <div class="auth-social">
+          <button class="btn" type="button" data-goggle><span class="mini-logo" data-logo="gogglecloud"></span> <span data-i18n="login.google">Войти через Goggle</span></button>
+        </div>
+        <div class="auth-alt"><span data-i18n="login.altq">Нет счёта?</span> <a class="link" data-goto="register" data-i18n="login.altlink">Открыть счёт</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= РЕГИСТРАЦИЯ ================= -->
+  <section class="tab-page" id="page-register">
+    <div class="auth">
+      <div class="auth-card">
+        <div class="auth-crest" data-crest></div>
+        <div class="auth-title" data-i18n="reg.title">Открыть счёт</div>
+        <div class="auth-sub" data-i18n="reg.sub">Минута — и вы в игре</div>
+        <form class="auth-form" data-auth="register" novalidate>
+          <div class="field">
+            <label data-i18n="field.username">Имя магната</label>
+            <input type="text" name="username" maxlength="24" autocomplete="nickname" data-i18n-ph="ph.username" placeholder="Как вас звать за столом?">
+            <div class="err" data-err="username"></div>
+          </div>
+          <div class="field">
+            <label data-i18n="field.email">Почта</label>
+            <input type="email" name="email" autocomplete="email" data-i18n-ph="ph.email" placeholder="broker@birzha.ru">
+            <div class="err" data-err="email"></div>
+          </div>
+          <div class="field">
+            <label data-i18n="field.password">Пароль</label>
+            <div class="pw">
+              <input type="password" name="password" autocomplete="new-password" data-i18n-ph="ph.password2" placeholder="Придумайте пароль">
+              <button type="button" class="pw-toggle" data-i18n="pw.show">показать</button>
+            </div>
+            <div class="pw-strength"><div class="bar"><i></i></div><span data-i18n="pw.default">—</span></div>
+            <div class="err" data-err="password"></div>
+          </div>
+          <div class="field">
+            <label data-i18n="field.confirm">Повторите пароль</label>
+            <div class="pw">
+              <input type="password" name="confirm" autocomplete="new-password" data-i18n-ph="ph.confirm" placeholder="Ещё раз">
+              <button type="button" class="pw-toggle" data-i18n="pw.show">показать</button>
+            </div>
+            <div class="err" data-err="confirm"></div>
+          </div>
+          <label class="chk auth-terms"><input type="checkbox" name="terms"><span data-i18n="reg.terms">Согласен с правилами биржи и играю честно</span></label>
+          <div class="err" data-err="terms"></div>
+          <button class="btn btn-primary" type="submit" style="width:100%" data-i18n="reg.submit">Зарегистрироваться</button>
+        </form>
+        <div class="auth-or"><span data-i18n="auth.or">или</span></div>
+        <div class="auth-social">
+          <button class="btn" type="button" data-goggle><span class="mini-logo" data-logo="gogglecloud"></span> <span data-i18n="reg.google">Регистрация через Goggle</span></button>
+        </div>
+        <div class="auth-alt"><span data-i18n="reg.altq">Уже есть счёт?</span> <a class="link" data-goto="login" data-i18n="reg.altlink">Войти</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ПОДТВЕРЖДЕНИЕ ПОЧТЫ ================= -->
+  <section class="tab-page" id="page-verify">
+    <div class="auth">
+      <div class="auth-card">
+        <div class="auth-crest" data-crest></div>
+        <div class="auth-title" data-i18n="verify.title">Подтверждение почты</div>
+        <div class="auth-sub"><span data-i18n="verify.sub">Мы отправили телеграмму с кодом на</span> <b id="verifyEmailLbl"></b></div>
+        <div class="code-cells" id="codeCells">
+          <input type="text" class="code-cell" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="1">
+          <input type="text" class="code-cell" inputmode="numeric" maxlength="1" aria-label="2">
+          <input type="text" class="code-cell" inputmode="numeric" maxlength="1" aria-label="3">
+          <input type="text" class="code-cell" inputmode="numeric" maxlength="1" aria-label="4">
+          <input type="text" class="code-cell" inputmode="numeric" maxlength="1" aria-label="5">
+          <input type="text" class="code-cell" inputmode="numeric" maxlength="1" aria-label="6">
+        </div>
+        <div class="auth-hint" data-i18n="verify.hint">Введите шесть цифр из письма — или вставьте код целиком из буфера</div>
+        <div class="err" id="verifyErr" style="text-align:center"></div>
+        <button class="btn btn-primary" id="verifyBtn" type="button" style="width:100%; margin-top:10px" data-i18n="verify.submit">Подтвердить</button>
+        <div class="verify-aux">
+          <span data-i18n="verify.noCode">Телеграмма не дошла?</span>
+          <a class="link" id="resendBtn" data-i18n="verify.resend">Отправить ещё раз</a>
+          <a class="link" id="verifyMailLink" data-i18n="verify.openMail">📮 Открыть почту</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ЛОББИ ================= -->
+  <section class="tab-page" id="page-lobby">
+    <div class="lobby">
+      <div class="hero">
+        <div class="hero-crest" data-crest></div>
+        <h1 data-i18n="brand.word">МОНОПОЛИЯ</h1>
+        <div class="tag" data-i18n="lobby.tag">Биржа · 1929</div>
+        <div class="est" data-i18n="lobby.est">Собери портфель корпораций и разори конкурентов</div>
+      </div>
+      <div class="lobby-grid">
+        <div class="panel">
+          <h3 data-i18n="lobby.create">Учредить партию</h3>
+          <div class="field">
+            <label data-i18n="lobby.roomname">Название комнаты</label>
+            <input type="text" id="roomName" maxlength="40" data-i18n-val="lobby.roomval" value="Вечерние торги">
+          </div>
+          <div class="switch-row">
+            <span data-i18n="lobby.private">Приватная комната</span>
+            <div class="switch" id="privateSwitch" role="switch" aria-checked="false"><i></i></div>
+          </div>
+          <div class="field">
+            <label data-i18n="lobby.mode">Режим</label>
+            <div class="seg" data-seg="mode">
+              <button type="button" class="on" data-val="blitz" data-i18n="lobby.mode.blitz">⚡ Блиц · ~15 мин</button><button type="button" data-val="classic" data-i18n="lobby.mode.classic">Классика</button>
+            </div>
+          </div>
+          <div class="field">
+            <label data-i18n="lobby.players">Акционеров</label>
+            <div class="seg" data-seg="players">
+              <button type="button" data-val="2">2</button><button type="button" data-val="3">3</button><button type="button" class="on" data-val="4">4</button><button type="button" data-val="5">5</button><button type="button" data-val="6">6</button>
+            </div>
+          </div>
+          <div class="field">
+            <label data-i18n="lobby.capital">Стартовый капитал</label>
+            <div class="seg" data-seg="capital">
+              <button type="button" data-val="1000">$1000</button><button type="button" class="on" data-val="1500">$1500</button><button type="button" data-val="2000">$2000</button>
+            </div>
+          </div>
+          <div class="field">
+            <label data-i18n="lobby.turntime">Время на ход</label>
+            <div class="seg" data-seg="turntime">
+              <button type="button" data-val="30" data-i18n="seg.30">30с</button><button type="button" class="on" data-val="60" data-i18n="seg.60">60с</button><button type="button" data-val="120" data-i18n="seg.120">120с</button><button type="button" data-val="">∞</button>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="createRoomBtn" type="button" style="width:100%" data-i18n="lobby.opengame">Открыть торги</button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:22px;">
+          <div class="panel rooms">
+            <h3 data-i18n="lobby.openrooms">Открытые комнаты</h3>
+            <div id="roomsList"></div>
+          </div>
+          <div class="panel">
+            <h3 data-i18n="lobby.codehead">Вход по коду</h3>
+            <div class="join-code">
+              <input type="text" id="joinCode" data-i18n-ph="lobby.codeph" placeholder="код комнаты, например r_x7f2">
+              <button class="btn btn-primary" id="joinCodeBtn" type="button" data-i18n="lobby.join">Войти</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= КОМНАТА (рисует game.js) ================= -->
+  <section class="tab-page" id="page-room"></section>
+
+  <!-- ================= ПАРТИЯ (рисует game.js) ================= -->
+  <section class="tab-page" id="page-game"></section>
+
+  <!-- ================= СЕРТИФИКАТ ================= -->
+  <section class="tab-page" id="page-card">
+    <div class="card-stage">
+      <div class="cert">
+        <div class="band-top" style="--cg:var(--g-green)"></div>
+        <div class="cert-in">
+          <div class="cert-head">
+            <span class="pos" data-i18n="cert.pos1">поле №34</span>
+            <div class="certlbl" data-i18n="cert.label">— Сертификат акции —</div>
+            <div class="logo-lg" data-logo="startbucks"></div>
+            <div class="ttl">Startbucks</div>
+            <div class="grp" data-i18n="cert.grp.green">Зелёная группа</div>
+          </div>
+          <table>
+            <tr><td data-i18n="cert.rent">Рента</td><td>$28</td></tr>
+            <tr><td data-i18n="cert.rentgroup">Со всей группой</td><td>$56</td></tr>
+            <tr class="hl"><td data-i18n="cert.r1">С 1 отделением</td><td>$150</td></tr>
+            <tr><td data-i18n="cert.r2">С 2 отделениями</td><td>$450</td></tr>
+            <tr><td data-i18n="cert.r3">С 3 отделениями</td><td>$1 000</td></tr>
+            <tr><td data-i18n="cert.r4">С 4 отделениями</td><td>$1 200</td></tr>
+            <tr><td data-i18n="cert.rhq">Со штаб-квартирой</td><td>$1 400</td></tr>
+            <tr><td data-i18n="cert.branch">Отделение</td><td>$200</td></tr>
+            <tr><td data-i18n="cert.mortgage">Залог</td><td>$160</td></tr>
+          </table>
+          <div class="foot">
+            <button class="btn btn-buy" data-i18n="cert.buy1">Купить $320</button>
+            <button class="btn" data-i18n="cert.auction">На аукцион</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cert">
+        <div class="band-top" style="--cg:var(--ink-soft)"></div>
+        <div class="cert-in">
+          <div class="cert-head">
+            <span class="pos" data-i18n="cert.pos2">поле №5</span>
+            <div class="certlbl" data-i18n="cert.label">— Сертификат акции —</div>
+            <div class="logo-lg" data-logo="fodex"></div>
+            <div class="ttl">FodEx</div>
+            <div class="grp" data-i18n="cert.grp.air">✈ Логистика</div>
+          </div>
+          <table>
+            <tr><td data-i18n="cert.air1">Рента (1 сеть)</td><td>$25</td></tr>
+            <tr><td data-i18n="cert.air2">2 сети</td><td>$50</td></tr>
+            <tr class="hl"><td data-i18n="cert.air3">3 сети</td><td>$100</td></tr>
+            <tr><td data-i18n="cert.air4">4 сети</td><td>$200</td></tr>
+            <tr><td data-i18n="cert.mortgage">Залог</td><td>$100</td></tr>
+          </table>
+          <div class="foot">
+            <button class="btn btn-buy" data-i18n="cert.buy2">Купить $200</button>
+            <button class="btn" data-i18n="cert.auction">На аукцион</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cert-note">
+        <h4 data-i18n="cert.note.title">Модалка покупки</h4>
+        <span data-i18n-html="cert.note.body">Появляется, когда фишка встаёт на свободную клетку.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= БРЕНД-КИТ ================= -->
+  <section class="tab-page" id="page-brands">
+    <div class="brands">
+      <div class="brands-intro">
+        <h2 data-i18n="brands.title">Бренд-кит: 28 пародийных марок</h2>
+        <p data-i18n-html="brands.intro"></p>
+      </div>
+      <div class="brand-grid" id="brandGrid"></div>
+    </div>
+  </section>
+
+  <!-- ================= СТИЛЬ ================= -->
+  <section class="tab-page" id="page-ds">
+    <div class="ds">
+      <div class="panel">
+        <h2 data-i18n="ds.palette">Палитра «Биржа 1929»</h2>
+        <div class="swatches">
+          <div class="sw"><div class="c" style="background:#f4ead0"></div><div class="m"><b data-i18n="ds.paper">Бумага</b><span>#F4EAD0</span></div></div>
+          <div class="sw"><div class="c" style="background:#241f16"></div><div class="m"><b data-i18n="ds.ink">Чернила</b><span>#241F16</span></div></div>
+          <div class="sw"><div class="c" style="background:#15563d"></div><div class="m"><b data-i18n="ds.emerald">Изумруд</b><span>#15563D</span></div></div>
+          <div class="sw"><div class="c" style="background:#7c2230"></div><div class="m"><b data-i18n="ds.oxblood">Бордо</b><span>#7C2230</span></div></div>
+          <div class="sw"><div class="c" style="background:#a9812f"></div><div class="m"><b data-i18n="ds.gold">Золото</b><span>#A9812F</span></div></div>
+          <div class="sw"><div class="c" style="background:#274b7a"></div><div class="m"><b data-i18n="ds.indigo">Индиго</b><span>#274B7A</span></div></div>
+          <div class="sw"><div class="c" style="background:#2f6f6a"></div><div class="m"><b data-i18n="ds.teal">Бирюза</b><span>#2F6F6A</span></div></div>
+          <div class="sw"><div class="c" style="background:#cdbb92"></div><div class="m"><b data-i18n="ds.cloth">Сукно</b><span>#CDBB92</span></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2 data-i18n="ds.groups">Цветовые группы на доске</h2>
+        <div class="swatches">
+          <div class="sw"><div class="c" style="background:var(--g-brown)"></div><div class="m"><b data-i18n="ds.g.brown">Коричневая</b><span>Nokla · Yahwoo!</span></div></div>
+          <div class="sw"><div class="c" style="background:var(--g-lblue)"></div><div class="m"><b data-i18n="ds.g.lblue">Голубая</b><span>Tvitter · Skyqe · Zoon</span></div></div>
+          <div class="sw"><div class="c" style="background:var(--g-pink)"></div><div class="m"><b data-i18n="ds.g.pink">Розовая</b><span>Instaglam · T-Nobile · Twutch</span></div></div>
+          <div class="sw"><div class="c" style="background:var(--g-orange)"></div><div class="m"><b data-i18n="ds.g.orange">Оранжевая</b><span>Reddat · SoundClod · Firefax</span></div></div>
+          <div class="sw"><div class="c" style="background:var(--g-red)"></div><div class="m"><b data-i18n="ds.g.red">Красная</b><span>Cosa-Cola · YouTune · Netflex</span></div></div>
+          <div class="sw"><div class="c" style="background:var(--g-yellow)"></div><div class="m"><b data-i18n="ds.g.yellow">Жёлтая</b><span>McRonald's · IKEYA · Snapchit</span></div></div>
+          <div class="sw"><div class="c" style="background:var(--g-green)"></div><div class="m"><b data-i18n="ds.g.green">Зелёная</b><span>Spatify · WhatsUpp · Startbucks</span></div></div>
+          <div class="sw"><div class="c" style="background:var(--g-dblue)"></div><div class="m"><b data-i18n="ds.g.dblue">Синяя</b><span>Nozama · Epple</span></div></div>
+        </div>
+      </div>
+      <div class="panel type-demo">
+        <h2 data-i18n="ds.typo">Типографика</h2>
+        <div class="t1" data-i18n-html="ds.typo.1">Playfair Display — <i>заголовки и гербы</i></div>
+        <div class="t2" data-i18n="ds.typo.2">Playfair 700 — названия компаний и суммы</div>
+        <div class="t3" data-i18n="ds.typo.3">EB Garamond — основной текст интерфейса, 16px, с засечками</div>
+        <div class="t4" data-i18n="ds.typo.4">Oswald — метки, тикеры, кнопки, цифры на клетках</div>
+      </div>
+      <div class="panel">
+        <h2 data-i18n="ds.components">Компоненты</h2>
+        <div class="comp-row" style="margin-bottom:16px">
+          <button class="btn btn-primary" data-i18n="ds.c.primary">Основная</button>
+          <button class="btn btn-buy" data-i18n="ds.c.buy">Покупка</button>
+          <button class="btn btn-gold" data-i18n="ds.c.gold">Золотая</button>
+          <button class="btn" data-i18n="ds.c.default">Обычная</button>
+          <button class="btn" disabled data-i18n="ds.c.disabled">Недоступна</button>
+        </div>
+        <div class="comp-row">
+          <span class="badge now" data-i18n="badge.now">ходит</span>
+          <span class="badge jail" data-i18n="badge.jail">под следствием</span>
+          <div class="ava" style="--pc:var(--emerald)">🎩</div>
+          <div class="ava" style="--pc:var(--oxblood)">💼</div>
+          <span class="seal" style="--sc:var(--emerald); position:static">A</span>
+          <span class="seal" style="--sc:var(--navy); position:static">Y</span>
+          <i class="house" style="position:static"></i>
+          <i class="hotel" style="position:static"></i>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ МОДАЛКА: пародийный аккаунт-чузер Goggle ============ -->
+<div class="modal-ovl hidden" id="modal-goggle">
+  <div class="goggle-card">
+    <div class="goggle-word" aria-hidden="true"><span>G</span><span>o</span><span>g</span><span>g</span><span>l</span><span>e</span></div>
+    <div class="goggle-sub" data-i18n="goggle.pick">Выберите счёт</div>
+    <div class="goggle-accs">
+      <button type="button" class="goggle-acc"><span class="goggle-ava" style="background:#4285f4">🎩</span><span class="ga-txt"><b data-i18n="goggle.acc1">Барон фон Демо</b><small>@goggle.demo</small></span></button>
+      <button type="button" class="goggle-acc"><span class="goggle-ava" style="background:#34a853">👑</span><span class="ga-txt"><b data-i18n="goggle.acc2">Гостья Биржи</b><small>@goggle.demo</small></span></button>
+    </div>
+    <div class="goggle-or"><span data-i18n="goggle.or">или представьтесь</span></div>
+    <input class="goggle-input" id="goggleName" maxlength="24" data-i18n-ph="goggle.ph" placeholder="Как вас записать?">
+    <div class="goggle-err" id="goggleErr"></div>
+    <button type="button" class="goggle-go" id="goggleGo" data-i18n="goggle.continue">Продолжить</button>
+    <div class="goggle-note" data-i18n="goggle.note">Дружеская пародия: настоящий Google не участвует, письма никуда не уходят.</div>
+  </div>
+</div>
+
+<!-- ============ МОДАЛКА: демо-почта «Почтовое отделение» ============ -->
+<div class="modal-ovl hidden" id="modal-mail">
+  <div class="mail-box">
+    <div class="mail-head"><span>📮</span> <span data-i18n="mail.title">Почтовое отделение</span> <span class="mail-demo" data-i18n="mail.demo">демо</span></div>
+    <div class="mail-note" data-i18n="mail.note">Демо-режим: письма не покидают сервер.</div>
+    <div id="mailLetters"></div>
+    <button class="btn" id="mailClose" type="button" style="width:100%; margin-top:18px" data-i18n="mail.close">Закрыть</button>
+  </div>
+</div>
+
+<!-- тосты -->
+<div id="toasts"></div>
+
+<script src="i18n.js?v=9"></script>
+<script src="logos.js?v=9"></script>
+<script src="app.js?v=9"></script>
+<script src="game.js?v=9"></script>
+</body>
+</html>

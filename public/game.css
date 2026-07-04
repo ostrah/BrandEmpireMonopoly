@@ -1,0 +1,302 @@
+/* =====================================================================
+   МОНОПОЛИЯ · «БИРЖА 1929» — стили игрового клиента (game.js)
+   Комната, модалки, аукцион, долг, сделки, победитель, анимации.
+   Опирается на переменные и классы styles.css (бумага/чернила/золото).
+   ===================================================================== */
+
+/* ===================== ЭКРАН КОМНАТЫ ===================== */
+.room-wrap{display:grid; grid-template-columns:1.35fr 1fr; gap:22px; max-width:1040px; margin:0 auto; align-items:start;}
+.room-main{padding:22px 26px;}
+.rm-name{font-family:var(--f-display); font-weight:900; font-size:30px; color:var(--emerald); line-height:1.1; margin-bottom:10px;}
+.rm-code-row{display:flex; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap;}
+.rm-code-lbl{font-family:var(--f-caps); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--oxblood);}
+.rm-code{font-family:var(--f-caps); font-size:14px; letter-spacing:.14em; color:var(--ink);
+  background:#fffdf5; border:1px dashed var(--gold); padding:6px 14px; cursor:pointer; transition:.14s;}
+.rm-code:hover{border-style:solid; box-shadow:0 2px 6px rgba(0,0,0,.15);}
+.rm-code.ok{color:var(--emerald); border-color:var(--emerald);}
+.room-main h3{font-family:var(--f-caps); font-size:12px; font-weight:500; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--oxblood); margin:18px 0 10px; padding-bottom:7px; border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:8px;}
+.room-main h3::before{content:'§'; color:var(--gold); font-family:var(--f-display); font-size:15px;}
+.rm-set{display:flex; gap:10px 22px; flex-wrap:wrap;}
+.rm-set .rs{display:flex; flex-direction:column; gap:2px; font-family:var(--f-caps); font-size:15px; letter-spacing:.04em;}
+.rm-set .rs b{font-family:var(--f-caps); font-weight:500; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft);}
+.rm-seat{padding:9px 10px;}
+.rm-seat.empty .ava{border-style:dashed; border-color:var(--line); color:var(--ink-soft);}
+.rm-seat .nm.free{font-style:italic; font-weight:400; color:var(--ink-soft); font-size:14px;}
+.rm-seat .rm-kick{border:1px solid var(--line); background:var(--paper); color:var(--oxblood);
+  width:26px; height:26px; cursor:pointer; font-size:12px; flex:0 0 auto; transition:.13s;}
+.rm-seat .rm-kick:hover{background:var(--oxblood); color:var(--paper);}
+.badge.host{color:var(--gold);}
+.badge.bot{color:var(--teal);}
+.badge.dead{color:var(--ink-soft); text-decoration:line-through;}
+.rm-tokens{padding-top:2px;}
+.rm-tokens .tk{width:52px; height:52px; font-size:23px;}
+.rm-tokens .tk.taken{opacity:.32; cursor:not-allowed; transform:none;}
+.rm-tokens .tk.taken:hover{border-color:var(--line);}
+.rm-btns{display:flex; gap:9px; flex-wrap:wrap; margin-top:20px;}
+.rm-btns .btn{flex:1 1 auto;}
+.rm-hint{color:var(--oxblood); font-size:13.5px; font-style:italic; margin-top:9px; min-height:1em;}
+.room-side .chat{max-height:none;}
+.room-side .msgs{min-height:260px; max-height:420px;}
+
+/* ===================== СЛУЖЕБНОЕ НА ДОСКЕ ===================== */
+/* штамп «залог» на клетке */
+.cell .m-stamp{position:absolute; top:42%; left:50%; transform:translate(-50%,-50%) rotate(-14deg);
+  font-family:var(--f-caps); font-size:7.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--oxblood); border:1px solid var(--oxblood); padding:1px 4px;
+  background:rgba(244,234,208,.85); z-index:2; pointer-events:none; white-space:nowrap;}
+.cell.mortgaged .logo, .cell.mortgaged .name, .cell.mortgaged .price{opacity:.45; filter:grayscale(.75);}
+.cell.mortgaged .band{opacity:.55;}
+
+/* вспышка СТАРТа при проходе */
+@keyframes gmFlashGo{
+  0%,100%{box-shadow:none;}
+  40%{box-shadow:inset 0 0 0 4px var(--gold), 0 0 22px rgba(214,177,88,.8); }
+}
+.cell.flash-go{animation:gmFlashGo .9s ease; z-index:5;}
+
+/* тряска кубиков при броске */
+@keyframes gmDiceShake{
+  0%{transform:translateY(0) rotate(-3deg);}
+  25%{transform:translateY(-3px) rotate(4deg);}
+  50%{transform:translateY(1px) rotate(-5deg);}
+  75%{transform:translateY(-2px) rotate(3deg);}
+  100%{transform:translateY(0) rotate(-2deg);}
+}
+.die.rolling{animation:gmDiceShake .14s linear infinite;}
+
+/* ===================== САЙДБАР ===================== */
+.gm-round{font-family:var(--f-caps); font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-soft); margin-top:8px; text-align:right;}
+.tbar i{transition:width .25s linear;}
+.tbar i.low{background:repeating-linear-gradient(45deg, var(--oxblood) 0 6px, var(--oxblood-lt) 6px 12px);}
+.player.me{box-shadow:inset 0 0 0 2px var(--paper), inset 0 0 0 3px var(--gold);}
+.player.dead{opacity:.45;}
+.player.dead .money{color:var(--ink-soft);}
+.asset.m{opacity:.4; outline:1px dashed var(--oxblood);}
+.gm-wait{font-size:14.5px; font-style:italic; color:var(--ink-2); padding:4px 2px; line-height:1.45;}
+.gm-wait b{font-style:normal;}
+.jail-head{font-family:var(--f-caps); font-size:12px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--oxblood); padding-bottom:2px;}
+
+/* ---- панель аукциона ---- */
+.auc h3{font-family:var(--f-caps); font-size:12px; font-weight:500; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--oxblood); margin-bottom:10px; padding-bottom:7px; border-bottom:1px solid var(--line);}
+.auc{display:flex; flex-direction:column; gap:9px;}
+.auc-lot{display:flex; align-items:center; gap:9px; font-family:var(--f-display); font-size:17px;}
+.auc-band{width:14px; height:24px; background:var(--gc); border:1px solid rgba(0,0,0,.25); flex:0 0 auto;}
+.auc-price{margin-left:auto; font-family:var(--f-caps); color:var(--ink-soft); font-size:14px;}
+.auc-cur{font-size:14.5px; color:var(--ink-2);}
+.auc-bid{font-family:var(--f-display); font-weight:900; font-size:21px; color:var(--oxblood);}
+.auc-lead{font-family:var(--f-caps); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--emerald);}
+.auc-btns .btn{padding:11px 4px; font-size:13px;}
+
+/* ---- плашка долга ---- */
+.debt-plaque{background:rgba(124,34,48,.1); border:1px solid var(--oxblood);
+  box-shadow:inset 0 0 0 2px var(--paper); padding:12px 14px; color:var(--oxblood);
+  font-size:15px; line-height:1.45;}
+.debt-plaque b{font-family:var(--f-caps); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  display:block; margin-bottom:4px;}
+.debt-plaque .sum{color:var(--oxblood); font-weight:700;}
+.debt-hint{font-size:12.5px; font-style:italic; color:var(--ink-2); margin-top:6px;}
+
+/* ---- панель сделок ---- */
+.trp-row{display:flex; align-items:center; gap:9px; padding:7px 0; font-size:14.5px;
+  border-bottom:1px dotted var(--line-soft);}
+.trp-row:last-child{border-bottom:none;}
+.trp-btn{margin-left:auto; padding:6px 12px !important; font-size:10.5px !important;}
+
+/* ===================== МОДАЛКИ ===================== */
+.gm-overlay{position:fixed; inset:0; z-index:60; background:rgba(24,18,8,.55);
+  display:flex; align-items:center; justify-content:center; padding:24px; overflow:auto;}
+.gm-modal{position:relative; width:100%; max-width:480px; max-height:92vh; overflow:auto;
+  background:linear-gradient(180deg, var(--paper), var(--paper-2)); border:2px solid var(--ink);
+  box-shadow:inset 0 0 0 3px var(--paper), inset 0 0 0 4px var(--gold), inset 0 0 0 5px var(--ink), var(--shadow);
+  padding:24px 26px;}
+.gm-modal.wide{max-width:620px;}
+.gm-modal.bare{background:none; border:none; box-shadow:none; padding:0; max-width:360px; overflow:visible;}
+.gm-modal.bare .cert{margin:0 auto; box-shadow:inset 0 0 0 3px var(--paper), inset 0 0 0 5px var(--line), var(--shadow);}
+.gm-close{position:absolute; top:9px; right:11px; z-index:3; width:28px; height:28px; cursor:pointer;
+  border:1px solid var(--line); background:var(--paper); color:var(--ink-2);
+  font-size:12px; line-height:1; transition:.13s;}
+.gm-close:hover{background:var(--oxblood); color:var(--paper);}
+.gm-h{font-family:var(--f-display); font-weight:900; font-size:22px; color:var(--emerald);
+  margin-bottom:14px; padding-bottom:9px; border-bottom:1px solid var(--line);}
+.gm-modal h4{font-family:var(--f-caps); font-size:11px; font-weight:500; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--oxblood); margin-bottom:8px;}
+.gm-row{display:flex; gap:10px; margin-top:16px;}
+.gm-row .btn{flex:1;}
+.gm-full{width:100%; margin-top:16px;}
+.gm-confirm p{font-size:16px; line-height:1.55; color:var(--ink-2);}
+.gm-sel, .gm-num{width:100%; background:#fffdf5; border:1px solid var(--ink); color:var(--ink);
+  box-shadow:inset 0 0 0 2px var(--paper); padding:10px 12px; font-family:var(--f-body); font-size:15px; outline:none;}
+.gm-sel:focus, .gm-num:focus{box-shadow:inset 0 0 0 2px var(--paper), inset 0 0 0 3px var(--gold);}
+.gm-modal .field label{display:block; font-family:var(--f-caps); font-size:11px; font-weight:500;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--oxblood); margin-bottom:7px;}
+
+/* ---- карта Шанс/Совет ---- */
+.gm-modal.gm-cardbox{max-width:390px; padding:0; background:none; border:none; box-shadow:none; overflow:visible;}
+.gm-card{position:relative; background:linear-gradient(180deg, var(--paper), var(--paper-2));
+  border:2px solid var(--ink); padding:30px 30px 26px; text-align:center;
+  box-shadow:inset 0 0 0 3px var(--paper), inset 0 0 0 4px var(--gold), inset 0 0 0 5px var(--ink), var(--shadow);}
+.gm-card.chance{transform:rotate(-1.2deg);}
+.gm-card.chest{transform:rotate(1.2deg);}
+.gm-card .corner-flor{position:absolute; font-size:13px; color:var(--gold);}
+.gm-card .corner-flor.tl{top:8px; left:12px;}
+.gm-card .corner-flor.br{bottom:8px; right:12px;}
+.gc-glyph{font-family:var(--f-display); font-weight:900; font-size:56px; line-height:1;}
+.gm-card.chance .gc-glyph{color:var(--oxblood);}
+.gm-card.chest .gc-glyph{color:var(--emerald);}
+.gc-deck{font-family:var(--f-caps); font-size:11px; letter-spacing:.4em; text-transform:uppercase;
+  color:var(--ink-soft); margin:8px 0 14px;}
+.gc-text{font-family:var(--f-body); font-size:17.5px; line-height:1.55; color:var(--ink);
+  padding:14px 6px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+.gc-who{margin:13px 0 4px; font-size:15px;}
+.gc-ok{margin-top:12px; padding:11px 30px;}
+
+/* ---- модалка активов ---- */
+.as-list{display:flex; flex-direction:column; max-height:56vh; overflow-y:auto; padding-right:4px;}
+.as-row{display:flex; align-items:center; gap:11px; padding:10px 2px; border-bottom:1px dotted var(--line-soft);}
+.as-row:last-child{border-bottom:none;}
+.as-row.m{background:rgba(124,34,48,.05);}
+.as-band{width:13px; height:28px; background:var(--gc); border:1px solid rgba(0,0,0,.25); flex:0 0 auto;}
+.as-info{flex:1; min-width:0;}
+.as-name{font-family:var(--f-display); font-weight:700; font-size:16px;}
+.as-mflag{font-family:var(--f-caps); font-size:9px; font-weight:500; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--oxblood); border:1px solid currentColor; padding:1px 6px; vertical-align:2px;}
+.as-mflag.hq{color:var(--emerald);}
+.as-h{display:flex; gap:2px; margin-top:4px;}
+.as-h .house, .as-h .hotel{position:static;}
+.as-note{font-size:12px; color:var(--ink-soft); font-style:italic; margin-top:3px;}
+.as-acts{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;}
+.as-acts .btn{padding:7px 10px; font-size:10.5px; letter-spacing:.05em;}
+
+/* ---- конструктор сделки / входящая сделка ---- */
+.tr-cols{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+.tr-list{max-height:210px; overflow-y:auto; border:1px solid var(--line-soft); background:#fffdf5;
+  box-shadow:inset 0 0 0 2px var(--paper); padding:7px 9px; margin-bottom:10px;}
+.tr-item{display:flex; align-items:center; gap:8px; font-size:14px; padding:4px 1px; cursor:pointer;}
+.tr-item input{accent-color:var(--emerald); flex:0 0 auto;}
+.tr-item .as-band{width:10px; height:18px;}
+.tr-empty{font-size:13px; font-style:italic; color:var(--ink-soft); padding:6px 2px;}
+.tr-cash-l{display:block; font-family:var(--f-caps); font-size:10px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-soft); margin-bottom:5px;}
+.tr-from{font-size:16px; margin-bottom:14px;}
+.tr-sum{font-size:15px; line-height:1.7; padding:8px 10px; background:#fffdf5;
+  border:1px solid var(--line-soft); box-shadow:inset 0 0 0 2px var(--paper); min-height:52px;}
+.tr-tile{display:inline-flex; align-items:center; gap:6px; margin-right:8px; white-space:nowrap;}
+
+/* ===================== ОВЕРЛЕЙ ПОБЕДИТЕЛЯ ===================== */
+.gm-winner{position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(700px 500px at 50% 40%, rgba(21,86,61,.35), rgba(13,26,20,.72));
+  padding:24px;}
+.gm-winner .win-card{background:linear-gradient(180deg, var(--paper), var(--paper-2));
+  border:2px solid var(--ink); text-align:center; padding:38px 58px 34px; max-width:440px;
+  box-shadow:inset 0 0 0 3px var(--paper), inset 0 0 0 5px var(--gold), inset 0 0 0 6px var(--ink), var(--shadow);
+  animation:gmWinIn .5s ease;}
+@keyframes gmWinIn{from{opacity:0; transform:translateY(18px) scale(.96);} to{opacity:1;}}
+.win-crest{width:96px; height:96px; margin:0 auto 10px;}
+.win-crest svg{width:100%; height:100%; display:block;}
+.win-lbl{font-family:var(--f-caps); font-size:12px; letter-spacing:.44em; text-transform:uppercase; color:var(--oxblood);}
+.win-name{font-family:var(--f-display); font-weight:900; font-size:38px; line-height:1.15; margin:10px 0 4px;}
+.win-sub{font-style:italic; color:var(--ink-soft); margin-bottom:20px;}
+
+/* ===================== ЗАПАСНОЙ ТОСТ ===================== */
+.gm-toast{position:fixed; left:50%; bottom:34px; transform:translateX(-50%); z-index:90;
+  background:var(--ink); color:var(--paper); font-family:var(--f-caps); font-size:13px; letter-spacing:.06em;
+  padding:11px 22px; border:1px solid var(--gold); box-shadow:var(--shadow);
+  animation:gmToastIn .25s ease; max-width:80vw; text-align:center;}
+.gm-toast.bye{opacity:0; transition:opacity .4s;}
+@keyframes gmToastIn{from{opacity:0; transform:translateX(-50%) translateY(10px);} to{opacity:1;}}
+
+/* ===================== АДАПТИВ ===================== */
+@media (max-width: 1000px){
+  .room-wrap{grid-template-columns:1fr;}
+  .tr-cols{grid-template-columns:1fr;}
+}
+
+/* ===================== ФИКСЫ ПО ПЛЕЙТЕСТУ ===================== */
+/* клетка владельца: заливка + кольцо цветом игрока (в ::after — вне транзишенов) */
+.cell.owned::after{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background: color-mix(in srgb, var(--own) 24%, transparent);
+  box-shadow: inset 0 0 0 3px var(--own);
+}
+.cell.owned.mortgaged::after{
+  background: color-mix(in srgb, var(--own) 6%, transparent);
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--own) 45%, transparent);
+}
+
+/* лог: ограничен по высоте и листается */
+#gmLog{ max-height: 200px; overflow-y: auto; overscroll-behavior: contain; }
+
+/* боковые клетки: компактнее, чтобы цена всегда была видна */
+.cell.side-left .logo, .cell.side-right .logo{ width:20px; height:20px; margin-top:2px; }
+.cell.side-left .name, .cell.side-right .name{ font-size:8.5px; line-height:1.05; padding:1px 2px 0; }
+.cell.side-left .price, .cell.side-right .price{ font-size:9.5px; padding:0 0 2px; margin-top:auto; }
+
+/* кнопка звука в панели хода */
+.tt-right{ display:flex; align-items:center; gap:9px; }
+.gm-snd{ border:1px solid var(--line); background:var(--paper); cursor:pointer;
+  font-size:14px; line-height:1; padding:4px 7px; box-shadow: inset 0 0 0 2px var(--paper); }
+.gm-snd:hover{ background:var(--paper-3); }
+
+/* вторая строка кнопок в модалке покупки («Активы») */
+.gm-modal .foot2{ padding-top:0; }
+.gm-modal .foot2 .btn{ width:100%; font-size:12px; padding:9px 8px; }
+
+/* адаптив: узкие экраны — колонка, сайдбар на всю ширину, модалки не шире экрана */
+.gm-modal{ max-width: min(480px, 94vw); }
+.gm-modal.bare{ max-width: min(360px, 94vw); }
+.gm-modal.gm-cardbox{ max-width: min(390px, 94vw); }
+@media (max-width: 1220px){
+  .game-layout{ flex-direction: column; align-items: center; }
+  .sidebar{ flex: 0 0 auto; width: min(760px, 96vw); }
+}
+
+/* таблица состояний на экране победителя */
+.win-tbl{ margin:14px auto 16px; max-width:300px; text-align:left;
+  border:1px solid var(--line); background:#fffdf5; box-shadow: inset 0 0 0 2px var(--paper); }
+.win-tbl-h{ font-family:var(--f-caps); font-size:10px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--oxblood); padding:7px 12px 5px; border-bottom:1px solid var(--line-soft); }
+.win-row{ display:flex; align-items:center; gap:9px; padding:7px 12px; border-bottom:1px dotted var(--line-soft); }
+.win-row:last-child{ border-bottom:none; }
+.win-row.top{ background:rgba(169,129,47,.14); }
+.win-row.dead{ opacity:.5; }
+.wr-dot{ width:10px; height:10px; border-radius:50%; background:var(--pc); flex:0 0 auto;
+  box-shadow:0 0 0 1.5px rgba(0,0,0,.2); }
+.wr-name{ flex:1; font-weight:600; font-size:14.5px; }
+.wr-sum{ font-family:var(--f-caps); font-weight:600; color:var(--emerald); letter-spacing:.03em; }
+
+
+/* ===================== ОТРАСЛЕВОЙ СТИЛЬ МОНОПОЛИЙ ===================== */
+/* водяной знак отрасли в углу клетки */
+.cell[class*="grp-"]::before{
+  position:absolute; right:2px; bottom:14px; font-size:26px; line-height:1;
+  opacity:.13; pointer-events:none; z-index:0;
+}
+.cell.row-top[class*="grp-"]::before{ bottom:auto; top:14px; }
+.cell.side-left[class*="grp-"]::before, .cell.side-right[class*="grp-"]::before{ font-size:20px; bottom:2px; }
+.cell.grp-brown::before{ content:'🦖'; }
+.cell.grp-lblue::before{ content:'📞'; }
+.cell.grp-pink::before{ content:'📸'; }
+.cell.grp-orange::before{ content:'🎵'; }
+.cell.grp-red::before{ content:'🍔'; }
+.cell.grp-yellow::before{ content:'🎬'; }
+.cell.grp-green::before{ content:'✉️'; }
+.cell.grp-dblue::before{ content:'👑'; }
+/* владелец-заливка теперь рисуется в ::after ПОВЕРХ водяного знака — ок */
+
+/* лого крупнее на верх/низ рядах — «картинка» каждой компании */
+.cell.row-top .logo, .cell.row-bottom .logo{ width:38px; height:38px; margin-top:5px; }
+
+/* рента на клетке с владельцем — бордовым, жирно */
+.cell .price.rent{ color:var(--oxblood); font-weight:700; }
+
+/* сертификат: фирменная шапка отрасли */
+.cert .cert-head{
+  position:relative;
+  background: linear-gradient(165deg, color-mix(in srgb, var(--cg, transparent) 26%, transparent), transparent 70%);
+}
+.cert-gsym{ position:absolute; top:10px; left:12px; font-size:26px; opacity:.55; }
