@@ -68,29 +68,39 @@ sleep 2
 echo "monopoly: $(systemctl is-active monopoly)"
 curl -fsS "http://127.0.0.1:$PORT/api/me" -o /dev/null -w "  локальный /api/me -> HTTP %{http_code}\n" || true
 
-echo "=== [5/6] Caddy: добавляю поддомен, tandem не трогаю ==="
-cp -a /etc/caddy/Caddyfile "/etc/caddy/Caddyfile.bak.$(date +%s)" 2>/dev/null || true
-# Полностью пересобираем Caddyfile из известного состояния: оба сайта.
-cat > /etc/caddy/Caddyfile <<CADDY
-{
-	email $EMAIL
-}
-
-$ROOT_DOMAIN {
-	encode gzip
-	reverse_proxy 127.0.0.1:3000
-}
-
+echo "=== [5/6] Caddy: только СВОЙ файл сайта (import-схема, соседей не трогаем) ==="
+mkdir -p /etc/caddy/sites
+cat > /etc/caddy/sites/monopoly.caddy <<CADDY
 $DOMAIN {
 	encode gzip
 	reverse_proxy 127.0.0.1:$PORT
 }
+CADDY
+# если сосед-tandem ещё не вынесен в sites/ — вынесем (его конфиг известен)
+if [ ! -f /etc/caddy/sites/tandem.caddy ]; then
+  cat > /etc/caddy/sites/tandem.caddy <<CADDY
+$ROOT_DOMAIN {
+	encode gzip
+	reverse_proxy 127.0.0.1:3000
+}
+CADDY
+fi
+# главный Caddyfile — общий шелл с import; пишем только если import-схемы ещё нет
+if ! grep -q "import /etc/caddy/sites" /etc/caddy/Caddyfile 2>/dev/null; then
+  cp -a /etc/caddy/Caddyfile "/etc/caddy/Caddyfile.bak.$(date +%s)" 2>/dev/null || true
+  cat > /etc/caddy/Caddyfile <<CADDY
+{
+	email $EMAIL
+}
+
+import /etc/caddy/sites/*.caddy
 
 http://$IP {
 	redir https://$ROOT_DOMAIN{uri} permanent
 }
 CADDY
-caddy validate --config /etc/caddy/Caddyfile 2>&1 | tail -2 || true
+fi
+caddy validate --config /etc/caddy/Caddyfile 2>&1 | tail -1 || true
 systemctl reload caddy || systemctl restart caddy
 sleep 1
 echo "caddy: $(systemctl is-active caddy)"
